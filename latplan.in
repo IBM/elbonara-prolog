@@ -1,0 +1,30 @@
+#!/usr/bin/env swipl
+%%% -*- mode : prolog -*-
+%% The model of Latplan AMA3+ (JAIR 2022).
+
+%% 1. Load the library in a new file.
+
+:- include("elbo.pl").
+
+%% 2. List the observables.
+
+observed(x0).
+observed(x1).
+
+%% 3. List the generative model.
+
+p([x0],[z0]).
+p([x1],[z1]).
+p([z1],[z0,a]).
+p([a],[z0]).
+p([z0],[]).
+
+%% 4. List the variational model and the empirical distribution (data distribution).
+
+q([z0],[x0]).
+q([z1],[x1]).
+q([a],[x0,x1]).
+q([x0,x1],[]).                  % empirical/data distribution.
+
+
+

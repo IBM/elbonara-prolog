@@ -1,0 +1,25 @@
+#!/usr/bin/env swipl
+%%% -*- mode : prolog -*-
+%% A VAE where there is an intermediate latent variable y.
+
+%% 1. Load the library in a new file.
+
+:- include("elbo.pl").
+
+%% 2. List the observables.
+
+observed(x).
+
+%% 3. List the generative model.
+
+p([x],[z]).                     % p(x|z)
+p([z],[]).                      % p(z)
+
+%% 4. List the variational model and the empirical distribution (data distribution).
+
+q([z],[y]).                     % q(z|y)
+q([y],[x]).                     % q(y|x)
+q([x],[]).                      % q(x) : empirical/data distribution.
+
+
+

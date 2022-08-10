@@ -1,0 +1,35 @@
+#!/usr/bin/env swipl
+%%% -*- mode : prolog -*-
+%% Hidden Markov Model for an arbitrary number of steps (depends on how many observed variables you will define)
+
+%% 1. Load the library in a new file.
+
+:- include("elbo.pl").
+
+%% 2. List the observables.
+
+observed(x(0)).
+observed(x(1)).
+observed(x(2)).
+observed(x(3)).
+observed(x(4)).
+
+%% 3. List the generative model.
+
+p([x(T)],[z(T)]):-
+    observed(x(T)).
+
+p([z(0)],[]).
+
+p([z(T1)],[z(T2)]) :-
+    p([x(T1)],[z(T1)]),
+    p([x(T2)],[z(T2)]),
+    T2+1 = T1.
+
+%% 4. List the variational model and the empirical distribution (data distribution).
+
+q([z(T)],[x(T)]):-
+    p([x(T)],[z(T)]).
+
+q(Obs,[]):-
+    findall(x(T), observed(x(T)), Obs).

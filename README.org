@@ -1,0 +1,104 @@
+
+
+* Deriving an Evidence Lower BOund (ELBO) / variational lower bound with Prolog
+
+Given a generative model and a variational model,
+this small program is able to enumerate all lower bounds
+that can be derived with Jensen's inequality.
+
+See https://arxiv.org/abs/2209.04049 Section 7.3 for the explanation.
+A library that helps generative modeling in Pytorch and is based on the principle in this Prolog implementation
+will be published in https://github.com/IBM/elbonara shortly.
+
+Requirement:
+
++ SWI-Prolog. Most package managers supports it
+  + Ubuntu : =sudo apt-add-repository ppa:swi-prolog/stable; sudo apt-get update ; sudo apt-get install swi-prolog=
+  + Fedora : =sudo dnf install pl=
+  + OSX : =brew install swi-prolog=
+
+Example Usage:
+
+#+begin_src
+swipl vae.in
+swipl hmm-1.in
+swipl hmm-2.in
+swipl latplan.in
+swipl latplan2.in
+#+end_src
+
+Btw, =make= will generate all outputs to save your time.
+
+
+License: MIT
+
+* An example for a VAE
+
+#+begin_src prolog
+#!/usr/bin/env swipl
+%%% -*- mode : prolog -*-
+
+%% 1. Load the library in a new file.
+
+:- include("elbo.pl").
+
+%% 2. List the observables.
+
+observed(x).
+
+%% 3. List the generative model.
+
+p([x],[z]).                     % p(x|z)
+p([z],[]).                      % p(z)
+
+%% 4. List the variational model and the empirical distribution (data distribution).
+
+q([z],[x]).                     % q(z|x)
+q([x],[]).                      % q(x)   --- empirical distribution / data distribution
+#+end_src
+
+Run SWI Prolog.
+
+#+begin_src
+$ swipl vae.in
+##################################
+
+preprocessing: reordering the variables in p
+preprocessing: reordering the variables in q
+preprocessing: done.
+
+Analyzing the generative model of:
+E(q([x]),p([x]))
+
+
+ELBOs that may including unrealizable sampling process:
+2 ELBOs.
+
+E([q([x],[]),q([z],[x])],log(p([x],[z]))+log(p([z],[]))/log(q([z],[x])))
+E([q([x],[]),p([z],[])],log(p([x],[z])))
+
+
+ELBOs with a feasible sampling process:
+2 ELBOs.
+
+E([q([x],[]),q([z],[x])],log(p([x],[z]))+log(p([z],[]))/log(q([z],[x])))
+E([q([x],[]),p([z],[])],log(p([x],[z])))
+#+end_src
+
+The result is equivalent to the following formula.
+
+$$
+\mathbb{E}_{q(x)} [ \mathbb{E}_{q(z|x)} \log p(x|z) - D_{\mathrm{KL}}(q(z|x) || p(z)) ]
+$$
+
+$$
+\mathbb{E}_{q(x)} [ \mathbb{E}_{p(z)} \log p(x|z) ]
+$$
+
+Depending on the model, it may return multiple, indeed many, formulae which are all valid lower bounds.
+We prune the formulae whose monte-carlo estimate of expectations are uncomputable
+because of the unsatisfied dependencies. Still, the number of formulae are sometimes too many.
+We are working on a more sophisticated and theoretically justified pruning method for these candidates.
+
+One heuristic for pruning these formula is to ignore ones that do not fully utilize all the samples.
+For example, $E_{q(x)} E_{p(z)} \log p(x|z)$ does not utilize $x ~ q(x)$.
