@@ -105,6 +105,17 @@ empirical(Q):-
 
 %%% ELBO
 
+unique_variables(Q):-
+    findall(Var,
+            (member(q(Vars,_),Q),
+             member(Var,Vars)),
+            Variables),
+    sort(Variables,Sorted),
+    length(Variables,N),
+    length(Sorted,N),
+    true.
+
+
 split_P(P,Q,P1,P2,P3):-
     observables(Xs),
     latents(Zs),
@@ -130,6 +141,7 @@ elbo('E'(Sampling_Distributions, Formula), Sampling_Distributions):-
     variational(AllQ),
     empirical(Emp),
     anysubset(AllQ,Q),
+    unique_variables(Q),
     split_P(P,Q,P1,P2,P3),
     union(Emp,Q,P2,Sampling_Distributions),
     %% generate the form
