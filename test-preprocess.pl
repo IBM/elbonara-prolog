@@ -6,3 +6,4 @@
 observed(c).
 p([c,b,a],[z,y,x]).
 q([c,b,a],[z,y,x]).
+p([z1],[z0,a]).

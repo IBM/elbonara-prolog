@@ -41,15 +41,15 @@ anysubset([_|Es], Sub):-
 %% This replaces user-defined ones with sorted ones, which requires dynamic/1.
 
 :- dynamic p/2, q/2.
+:- discontiguous p/2, q/2.
 preprocess:-
     nl,
     writeln("preprocessing: reordering the variables in p"),
     findall([p(X1,Y1),p(X2,Y2)],
             (p(X1,Y1),
              sort(X1,X2),
-             not(=(X1,X2)),
              sort(Y1,Y2),
-             not(=(Y1,Y2))),Ps),
+             not((X1=X2,Y1=Y2))),Ps),
     foreach(member([p(X1,Y1),p(X2,Y2)], Ps),
             (retract(p(X1,Y1)),
              assertz(p(X2,Y2)),
@@ -58,10 +58,9 @@ preprocess:-
     findall([q(X1,Y1),q(X2,Y2)],
             (q(X1,Y1),
              sort(X1,X2),
-             not(=(X1,X2)),
              sort(Y1,Y2),
-             not(=(Y1,Y2))),Ps),
-    foreach(member([q(X1,Y1),q(X2,Y2)], Ps),
+             not((X1=X2,Y1=Y2))),Qs),
+    foreach(member([q(X1,Y1),q(X2,Y2)], Qs),
             (retract(q(X1,Y1)),
              assertz(q(X2,Y2)),
              write("replacing "),write(q(X1,Y1)),write(" -> "),write(q(X2,Y2)),nl)),
